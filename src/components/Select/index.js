@@ -13,7 +13,7 @@ export default function Select({
   return (
     <AreaSelect visible={disabled}>
       <Title>{title}</Title>
-      <Options options={options} value={value} onChange={functionOnChange} />
+      <Options options={options} onChange={functionOnChange} />
     </AreaSelect>
   );
 }

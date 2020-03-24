@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { compareAsc, format, addYears } from 'date-fns';
+import { compareAsc, format, addYears, differenceInDays } from 'date-fns';
 import ModalOption from '../../components/ModalOption';
+
 import {
   AreaHome,
   AreaContent,
@@ -18,7 +18,7 @@ import {
   AreaButton,
   RefreshIcon,
 } from './styles';
-import * as HomeActions from '../../store/modules/home/actions';
+import * as InvestmentsActions from '../../store/modules/investments/actions';
 import Header from '../../components/Header';
 import Select from '../../components/Select';
 import Graph from '../../components/Graph';
@@ -29,8 +29,8 @@ import InputValue from '../../components/InputValue';
 
 export default function Home() {
   const { loading } = useSelector(state => state.common);
-  const { repositories, user } = useSelector(state => state.home);
   const [typeInvesting, setTypeInvesting] = useState('');
+  const [message, setMessage] = useState('');
   const dispatch = useDispatch();
   const [options, setOptions] = useState([
     { name: 'Bitcoin', active: false, icon: () => <BitIcon />, disabled: null },
@@ -62,23 +62,23 @@ export default function Home() {
     valueFunction: () => {},
     valueVisible: null,
     alternOption: false,
-    value: 'R$: 0,000',
+    value: 'R$: 0,00',
     valueOptions: [
-      { label: 'R$  1.000,00', value: 1000.0, checked: false },
+      { label: 'R$  2.000,00', value: 2000.0, checked: false },
       { label: 'R$ 10.000,00', value: 10000.0, checked: false },
     ],
   });
   const [visibleComponentOptions, setVisibleComponentOptions] = useState(false);
   const [visibleComponentGraph, setVisibleComponentGraph] = useState(false);
   const data = [
-    { name: 'Page A', uv: 4000, pv: 2400, amt: 2400, time: 1 },
-    { name: 'Page B', uv: 3000, pv: 1398, amt: 2210, time: 3 },
-    { name: 'Page C', uv: 2000, pv: -9800, amt: 2290, time: 9 },
-    { name: 'Page D', uv: 2780, pv: 3908, amt: 2000, time: 10 },
-    { name: 'Page E', uv: 2500, pv: 4800, amt: 2181, time: 12 },
-    { name: 'Page F', uv: 1220, pv: 3800, amt: 2500, time: 16 },
-    { name: 'Page G', uv: 2300, pv: 4300, amt: 2100, time: 18 },
-    { name: 'Page H', uv: 2300, pv: 4300, amt: 2100, time: 24 },
+    { name: 'Page A', uv: 4000, pv: 2400, time: 1 },
+    { name: 'Page B', uv: 3000, pv: 1398, time: 3 },
+    { name: 'Page C', uv: 2000, pv: -9800, time: 9 },
+    { name: 'Page D', uv: 2780, pv: 3908, time: 10 },
+    { name: 'Page E', uv: 2500, pv: 4800, time: 12 },
+    { name: 'Page F', uv: 1220, pv: 3800, time: 16 },
+    { name: 'Page G', uv: 2300, pv: 4300, time: 18 },
+    { name: 'Page H', uv: 2300, pv: 4300, time: 24 },
   ];
   function optionChange(indexParam, optionValueParam) {
     setTypeInvesting(optionValueParam);
@@ -121,7 +121,7 @@ export default function Home() {
   function functionSetValueDate(valueDateParam) {
     setDateOption({
       ...dateOption,
-      dateValue: valueDateParam,
+      dateValue: valueDateParam.value,
     });
   }
   function functionOnChangeRadio(valueParam, indexParam, optionsParam) {
@@ -197,10 +197,46 @@ export default function Home() {
       alternOption: false,
       value: 'R$: 0,000',
       valueOptions: [
-        { label: 'R$  1.000,00', value: 1000.0, checked: false },
+        { label: 'R$  2.000,00', value: 2000.0, checked: false },
         { label: 'R$ 10.000,00', value: 10000.0, checked: false },
       ],
     });
+    setVisibleComponentOptions(false);
+  }
+  function functionGenerateGraph(
+    dateInitialParam,
+    valueParam,
+    typeInvestingParam
+  ) {
+    if (!dateInitialParam || dateInitialParam === undefined) {
+      setMessage('error date invalid');
+      return false;
+    }
+    const today = new Date();
+    const initalDay = new Date(dateInitialParam);
+    if (today < initalDay) {
+      setMessage('error date invalid');
+      return false;
+    }
+    const daysBetween = differenceInDays(today, initalDay);
+    if (daysBetween <= 0) {
+      setMessage('error date invalid');
+      return false;
+    }
+    if (!valueParam || valueParam === undefined) {
+      setMessage('error value invalid');
+      return false;
+    }
+    const clearValue = valueParam.toString().replace(/[: .\sR$]/gm, '');
+    const newValue = clearValue.replace(',', '.');
+    dispatch(
+      InvestmentsActions.generateValueInvestments(
+        dateInitialParam,
+        newValue,
+        typeInvestingParam,
+        daysBetween
+      )
+    );
   }
   return (
     <AreaHome>
@@ -223,8 +259,7 @@ export default function Home() {
             title="Selecione um periodo:"
             options={dateOption.dateOptions}
             disabled={!dateOption.alternOption}
-            functionOnChange={value => functionSetValueDate(value)}
-            value={dateOption.dateValue}
+            functionOnChange={valueDate => functionSetValueDate(valueDate)}
           />
           <IconButton
             icon={<CalendarIcon />}
@@ -258,13 +293,25 @@ export default function Home() {
           />
         </AreaRadio>
         <AreaButton visible={visibleComponentOptions}>
-          <IconButton icon={<GoGraphIcon />} />
+          <IconButton
+            icon={<GoGraphIcon />}
+            functionOnClick={() =>
+              functionGenerateGraph(
+                dateOption.dateValue,
+                valueOption.value,
+                typeInvesting
+              )
+            }
+          />
           <IconButton
             icon={<RefreshIcon />}
             functionOnClick={() => functionClearStates()}
           />
         </AreaButton>
-        <AreaGraph visible={visibleComponentGraph}>
+        <AreaGraph
+          // visible={visibleComponentGraph}
+          visible
+        >
           <Graph data={data} title="Rentabilidade" />
         </AreaGraph>
       </AreaContent>
