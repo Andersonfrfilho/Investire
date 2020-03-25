@@ -14,9 +14,24 @@ export function generateValueInvestments(
     },
   };
 }
-export function dataGraph() {
+
+export function defineGraph(
+  initialDate,
+  initialValue,
+  finalValue,
+  rentability,
+  graphValue,
+  graphGenerate
+) {
   return {
     type: '',
-    payload: {},
+    payload: {
+      initialDate,
+      initialValue,
+      finalValue,
+      rentability,
+      graphValue,
+      graphGenerate,
+    },
   };
 }
