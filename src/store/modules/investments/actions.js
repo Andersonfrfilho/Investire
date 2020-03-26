@@ -22,7 +22,8 @@ export function defineGraph(
   rentability,
   graphValue,
   graphGenerate,
-  closedOptions
+  closedOptions,
+  valueMajor
 ) {
   return {
     type: '@investments/ADD_TO_VALUE',
@@ -34,6 +35,7 @@ export function defineGraph(
       graphValue,
       graphGenerate,
       closedOptions,
+      valueMajor,
     },
   };
 }

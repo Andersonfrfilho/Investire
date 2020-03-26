@@ -39,6 +39,7 @@ export default function Home() {
     rentability,
     graphGenerate,
     graphValue,
+    majorValue,
   } = useSelector(state => state.investments);
   console.tron.log(graphGenerate, graphGenerate);
   const [typeInvesting, setTypeInvesting] = useState('');
@@ -355,7 +356,12 @@ export default function Home() {
               <Title>{`${Number(rentability).toLocaleString('pt-BR')}`}</Title>
             </AreaText>
           </AreaTitle>
-          <Graph data={graphValue} title="Rentabilidade" height={heightGraph} />
+          <Graph
+            data={graphValue}
+            title="Rentabilidade"
+            height={heightGraph}
+            numberMax={Number(majorValue) + 1000}
+          />
         </AreaGraph>
       </AreaContent>
     </AreaHome>

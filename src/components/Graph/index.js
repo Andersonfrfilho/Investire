@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { AreaSelect, Title } from './styles';
 
-export default function Graph({ data, title, height }) {
+export default function Graph({ data, title, height, numberMax }) {
   return (
     <AreaSelect>
       <Title>{title}</Title>
@@ -23,8 +23,8 @@ export default function Graph({ data, title, height }) {
       >
         <Tooltip />
         <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-        <Line type="monotone" dataKey="pv" stroke="#387908" yAxisId={0} />
-        <YAxis />
+        <Line type="monotone" dataKey="valor" stroke="#387908" yAxisId={0} />
+        <YAxis y={numberMax} />
         <XAxis dataKey="name" fontSize={12} />
       </LineChart>
     </AreaSelect>
@@ -33,9 +33,13 @@ export default function Graph({ data, title, height }) {
 Graph.propTypes = {
   data: PropTypes.arrayOf(PropTypes.object),
   title: PropTypes.string,
+  height: PropTypes.number,
+  numberMax: PropTypes.number,
 };
 Graph.defaultProps = {
   title: 'titulo da tabela',
+  height: 0,
+  numberMax: 0,
   data: [
     { name: 'Page A', uv: 4000, pv: 2400, amt: 2400, time: 1 },
     { name: 'Page B', uv: 3000, pv: 1398, amt: 2210, time: 3 },

@@ -8,6 +8,7 @@ const INITIAL_STATE = {
   graphGenerate: false,
   optionsGenerate: true,
   graphValue: [],
+  majorValue: 0,
 };
 
 export default function login(state = INITIAL_STATE, action) {
@@ -21,6 +22,7 @@ export default function login(state = INITIAL_STATE, action) {
         draft.graphValue = action.payload.graphValue;
         draft.graphGenerate = action.payload.graphGenerate;
         draft.optionsGenerate = action.payload.closedOptions;
+        draft.majorValue = action.payload.valueMajor;
       });
     case '@investments/RESET_VALUE':
       return produce(state, draft => {
@@ -31,6 +33,7 @@ export default function login(state = INITIAL_STATE, action) {
         draft.graphValue = [];
         draft.graphGenerate = false;
         draft.optionsGenerate = action.payload.closedOptions;
+        draft.majorValue = 0;
       });
     default:
       return state;

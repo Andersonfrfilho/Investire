@@ -13,6 +13,7 @@ function* generateValue({
   try {
     let diferenceValue;
     let investimentValue;
+
     const dataGraph = [];
     if (typeInvestments === 'Tesouro Direto pré-fixado') {
       const today = new Date();
@@ -30,7 +31,7 @@ function* generateValue({
           const formatDate = format(newDate, 'dd/MM/yyyy');
           dataGraph.push({
             name: formatDate,
-            pv: (diferenceValue / (i + 1) + investimentValueLess).toFixed(2),
+            valor: (diferenceValue / (i + 1) + investimentValueLess).toFixed(2),
             time: i,
           });
         }
@@ -43,7 +44,7 @@ function* generateValue({
           const formatDate = format(newDate, 'dd/MM/yyyy');
           dataGraph.push({
             name: formatDate,
-            pv: diferenceValue / (i + 1) + Number(initialValue),
+            valor: diferenceValue / (i + 1) + Number(initialValue),
             time: i,
           });
         }
@@ -106,7 +107,7 @@ function* generateValue({
       const data = valueRealBitCoin.map((bitCointValueReal, index) => {
         return {
           name: format(new Date(dateValue[index]), 'dd/MM/yyyy'),
-          pv: (Number(qtdbitCoin) * Number(bitCointValueReal)).toFixed(2),
+          valor: (Number(qtdbitCoin) * Number(bitCointValueReal)).toFixed(2),
           time: index,
         };
       });
@@ -119,9 +120,14 @@ function* generateValue({
           dataGraph.push({ ...data[i], time: i });
         }
       }
-      console.tron.log(data);
-      diferenceValue = data[data.length - 2].pv - data[0].pv;
-      investimentValue = data[data.length - 2].pv;
+      diferenceValue = data[data.length - 2].valor - data[0].valor;
+      investimentValue = data[data.length - 2].valor;
+    }
+    let valueMajor = dataGraph[0].valor;
+    for (let i = 0; i < dataGraph.length; i += 1) {
+      if (Number(dataGraph[i].valor) >= valueMajor) {
+        valueMajor = dataGraph[i].valor;
+      }
     }
     toast.success('grafico gerado');
     yield put(
@@ -132,7 +138,8 @@ function* generateValue({
         diferenceValue,
         dataGraph,
         true,
-        false
+        false,
+        valueMajor
       )
     );
     yield put(successAction(''));
