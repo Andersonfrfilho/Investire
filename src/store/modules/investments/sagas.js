@@ -1,20 +1,10 @@
 import { all, call, put, takeLatest } from 'redux-saga/effects';
 import { toast } from 'react-toastify';
-import { differenceInDays, subDays, format, addDays } from 'date-fns';
+import { subDays, format, addDays } from 'date-fns';
 import axios from 'axios';
-import {
-  fixedRate,
-  postFixed,
-  NewException,
-  errorVerify,
-} from '../../../utils';
+import { fixedRate, errorVerify } from '../../../utils';
 import { defineGraph } from './actions';
-import {
-  loading,
-  successAction,
-  failureAction,
-  breakAction,
-} from '../common/actions';
+import { loading, successAction, failureAction } from '../common/actions';
 
 function* generateValue({
   payload: { initialDate, initialValue, typeInvestments, daysBetween },
@@ -41,7 +31,7 @@ function* generateValue({
           const formatDate = format(newDate, 'dd/MM/yyyy');
           dataGraph.push({
             name: formatDate,
-            valor: (diferenceValue / (i + 1) + investimentValueLess).toFixed(2),
+            pv: (diferenceValue / (i + 1) + investimentValueLess).toFixed(2),
             time: i,
           });
         }
@@ -54,14 +44,14 @@ function* generateValue({
           const formatDate = format(newDate, 'dd/MM/yyyy');
           dataGraph.push({
             name: formatDate,
-            valor: diferenceValue / (i + 1) + Number(initialValue),
+            pv: diferenceValue / (i + 1) + Number(initialValue),
             time: i,
           });
         }
       }
     } else {
       const dateInitial = new Date(initialDate);
-      const dateInitialFormat = format(dateInitial, 'yyyy-MM-dd');
+      const dateInitialFormat = format(addDays(dateInitial, 1), 'yyyy-MM-dd');
       const dateInitialFormatTwo = format(dateInitial, 'yyyyMMdd');
       const dateEnd = new Date();
       const dateEndFormat = format(dateEnd, 'yyyy-MM-dd');
@@ -74,6 +64,14 @@ function* generateValue({
         axios.get,
         `https://api.coindesk.com/v1/bpi/historical/close.json?start=${dateInitialFormat}&end=${dateEndFormat}`
       );
+      const valueBitCoin = [];
+      const dateValue = [];
+
+      for (const key in bpi) {
+        valueBitCoin.push(bpi[key]);//eslint-disable-line
+        dateValue.push(key);
+      }
+      console.tron.log(bpi);
       const dataDollarValues = [];
       let dateInitalAux = dateInitial;
       let dateInitialFormatAux = format(dateInitalAux, 'yyyyMMdd');
@@ -101,39 +99,51 @@ function* generateValue({
       for (let j = 0; j < dollarValues.length; j += 1) {
         dataDollarValues.push(dollarValues[j]);
       }
-      const values = dataDollarValues.map(element => element.high);
-      console.tron.log(values);
+      const valuesDollarForReal = dataDollarValues.map(element => element.high);
+      const valueRealBitCoin = valueBitCoin.map(
+        (bitcoin, index) => bitcoin * valuesDollarForReal[index]
+      );
+      console.tron.log(valueBitCoin);
+      const qtdbitCoin = initialValue / valueRealBitCoin[0];
+      console.tron.log(valueRealBitCoin, dataDollarValues);
+      const data = valueRealBitCoin.map((bitCointValueReal, index) => {
+        return {
+          name: format(new Date(dateValue[index]), 'dd/MM/yyyy'),
+          pv: (Number(qtdbitCoin) * Number(bitCointValueReal)).toFixed(2),
+          time: index,
+        };
+      });
+      if (daysBetween >= 30) {
+        for (let i = 30; i > 0; i -= 1) {
+          dataGraph.push({ ...data[data.length - i], time: 30 - i });
+        }
+      } else {
+        for (let i = 0; i > Number(daysBetween); i += 1) {
+          dataGraph.push({ ...data[i], time: i });
+        }
+      }
+      console.tron.log(data);
+      diferenceValue = data[data.length - 2].pv - data[0].pv;
+      investimentValue = data[data.length - 2].pv;
+
+      // const valueBitCoinReal = bpi.map((element, index) =>
+      //   console.tron.log(element)
+      // );
+      // console.tron.log(valueBitCoinReal);
     }
     toast.success('grafico gerado');
+    yield put(
+      defineGraph(
+        initialDate,
+        initialValue,
+        investimentValue,
+        diferenceValue,
+        dataGraph,
+        true,
+        false
+      )
+    );
     yield put(successAction(''));
-    // yield put(
-    //  defineGraph(
-    //    initialDate,
-    //    initialValue,
-    //    investimentValue,
-    //    diferenceValue,
-    //    dataGraph,
-    //    true
-    //  )
-    // );
-    // const { data: receiveUser } = yield call(
-    //   api.get,
-    //   `/users/${user.toLowerCase()}`
-    // );
-    // if (users.length === 0) {
-    //   yield put(addToUser(receiveUser));
-    //   toast.success('Usuario adicionado');
-    //   yield put(successAction(''));
-    // } else {
-    //   const newUser = users.find(element => element.id === receiveUser.id);
-    //   if (newUser === undefined) {
-    //     yield put(addToUser(receiveUser));
-    //     toast.success('Usuario adicionado');
-    //     yield put(successAction(''));
-    //   } else {
-    //     throw new UserException('usuário ja cadastrado');
-    //   }
-    // }
   } catch (error) {
     const menssage = errorVerify(error);
     toast.error(menssage);

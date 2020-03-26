@@ -1,24 +1,31 @@
 import React from 'react';
 
 import PropTypes from 'prop-types';
-import { LineChart, XAxis, Tooltip, CartesianGrid, Line } from 'recharts';
+import {
+  LineChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Line,
+} from 'recharts';
 import { AreaSelect, Title } from './styles';
 
-export default function Graph({ data, title }) {
+export default function Graph({ data, title, height }) {
   return (
     <AreaSelect>
       <Title>{title}</Title>
       <LineChart
-        width={400}
-        height={400}
+        width={900}
+        height={height}
         data={data}
         margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
       >
-        <XAxis dataKey="name" />
         <Tooltip />
-        <CartesianGrid stroke="#f5f5f5" />
-        <Line type="monotone" dataKey="uv" stroke="#ff7300" yAxisId={0} />
-        <Line type="monotone" dataKey="pv" stroke="#387908" yAxisId={1} />
+        <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+        <Line type="monotone" dataKey="pv" stroke="#387908" yAxisId={0} />
+        <YAxis />
+        <XAxis dataKey="name" fontSize={12} />
       </LineChart>
     </AreaSelect>
   );

@@ -9,6 +9,7 @@ export default function DataPicker({
   startDate,
   title,
   disabled,
+  select,
   functionOnChange,
 }) {
   registerLocale('pt-Br', ptBR);
@@ -18,7 +19,7 @@ export default function DataPicker({
       <Title>{title}</Title>
       <PickerDate
         disabled={disabled}
-        selected={startDate}
+        selected={select}
         onChange={date => functionOnChange(date)}
         locale="pt-Br"
         dateFormat="P"

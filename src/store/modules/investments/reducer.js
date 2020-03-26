@@ -6,6 +6,7 @@ const INITIAL_STATE = {
   finalValue: '',
   rentability: '',
   graphGenerate: false,
+  optionsGenerate: true,
   graphValue: [],
 };
 
@@ -18,11 +19,18 @@ export default function login(state = INITIAL_STATE, action) {
         draft.finalValue = action.payload.finalValue;
         draft.rentability = action.payload.rentability;
         draft.graphValue = action.payload.graphValue;
-        draft.graphExibe = action.payload.graphGenerate;
+        draft.graphGenerate = action.payload.graphGenerate;
+        draft.optionsGenerate = action.payload.closedOptions;
       });
     case '@investments/RESET_VALUE':
       return produce(state, draft => {
-        draft.users = action.payload.users;
+        draft.initialDate = new Date();
+        draft.initialValue = '';
+        draft.finalValue = '';
+        draft.rentability = '';
+        draft.graphValue = [];
+        draft.graphGenerate = false;
+        draft.optionsGenerate = action.payload.closedOptions;
       });
     default:
       return state;

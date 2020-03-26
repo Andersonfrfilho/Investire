@@ -75,13 +75,34 @@ export const AreaButton = styled.div`
 `;
 export const AreaGraph = styled.div`
   display: flex;
-  flex-direction: row;
-  justify-content: stretch;
-  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
   margin-top: 15px;
   min-width: 520px;
   opacity: ${({ visible }) => (visible ? '1' : '0')};
   transition: visibility 0.7s linear 300ms, opacity 300ms;
+`;
+export const AreaTitle = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+`;
+export const Title = styled.p`
+  flex: 1;
+  font-size: 16px;
+  font-weight: ${({ bold }) => (bold ? 'bold' : 'none')};
+`;
+export const AreaText = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  background-color: #f7f7f7;
+  justify-content: center;
+  align-items: center;
+  margin: 5px;
+  border-radius: 12px;
 `;
 export const RepositoryList = styled.ul`
   padding-top: 30px;

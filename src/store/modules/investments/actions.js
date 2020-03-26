@@ -21,10 +21,11 @@ export function defineGraph(
   finalValue,
   rentability,
   graphValue,
-  graphGenerate
+  graphGenerate,
+  closedOptions
 ) {
   return {
-    type: '',
+    type: '@investments/ADD_TO_VALUE',
     payload: {
       initialDate,
       initialValue,
@@ -32,6 +33,15 @@ export function defineGraph(
       rentability,
       graphValue,
       graphGenerate,
+      closedOptions,
+    },
+  };
+}
+export function resetGraph(closedOptions) {
+  return {
+    type: '@investments/RESET_VALUE',
+    payload: {
+      closedOptions,
     },
   };
 }
