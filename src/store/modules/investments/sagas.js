@@ -16,7 +16,6 @@ function* generateValue({
     const dataGraph = [];
     if (typeInvestments === 'Tesouro Direto pré-fixado') {
       const today = new Date();
-      const initialDay = new Date(initialDate);
       const tax = 0.1 / 360;
       if (daysBetween >= 30) {
         const investimentValueLess = fixedRate(
@@ -52,10 +51,8 @@ function* generateValue({
     } else {
       const dateInitial = new Date(initialDate);
       const dateInitialFormat = format(addDays(dateInitial, 1), 'yyyy-MM-dd');
-      const dateInitialFormatTwo = format(dateInitial, 'yyyyMMdd');
       const dateEnd = new Date();
       const dateEndFormat = format(dateEnd, 'yyyy-MM-dd');
-      const dateEndFormatTwo = format(dateEnd, 'yyyyMMdd');
       const restYear = daysBetween % 100;
       const repeatYear = Math.trunc(daysBetween / 100);
       const {
@@ -125,11 +122,6 @@ function* generateValue({
       console.tron.log(data);
       diferenceValue = data[data.length - 2].pv - data[0].pv;
       investimentValue = data[data.length - 2].pv;
-
-      // const valueBitCoinReal = bpi.map((element, index) =>
-      //   console.tron.log(element)
-      // );
-      // console.tron.log(valueBitCoinReal);
     }
     toast.success('grafico gerado');
     yield put(

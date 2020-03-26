@@ -39,7 +39,6 @@ export default function Home() {
     rentability,
     graphGenerate,
     graphValue,
-    optionsGenerate,
   } = useSelector(state => state.investments);
   console.tron.log(graphGenerate, graphGenerate);
   const [typeInvesting, setTypeInvesting] = useState('');
