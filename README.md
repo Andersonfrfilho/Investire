@@ -11,4 +11,4 @@ Investire e uma aplicação que calcula seu tipo de investimento dentre eles bit
 ## Iniciar o projeto utilize
 ### `yarn start`
 
-A aplicação iniciara neste endereço você pode acessa-lo no seu navegador Open [http://localhost:3000](http://localhost:3000) .<br />
+A aplicação iniciara neste endereço você pode acessa-lo no seu navegador Acesse: [http://localhost:3000](http://localhost:3000) .<br />
