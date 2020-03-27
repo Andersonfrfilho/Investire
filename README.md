@@ -1,4 +1,5 @@
 Este projeto foi desenvolvido com o [Create React App](https://github.com/facebook/create-react-app).
+<img src="./docs/icons.png"/>
 
 ## Investire
 
