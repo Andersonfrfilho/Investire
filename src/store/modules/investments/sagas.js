@@ -69,7 +69,6 @@ function* generateValue({
         valueBitCoin.push(bpi[key]);//eslint-disable-line
         dateValue.push(key);
       }
-      console.tron.log(bpi);
       const dataDollarValues = [];
       let dateInitalAux = dateInitial;
       let dateInitialFormatAux = format(dateInitalAux, 'yyyyMMdd');
@@ -101,9 +100,7 @@ function* generateValue({
       const valueRealBitCoin = valueBitCoin.map(
         (bitcoin, index) => bitcoin * valuesDollarForReal[index]
       );
-      console.tron.log(valueBitCoin);
       const qtdbitCoin = initialValue / valueRealBitCoin[0];
-      console.tron.log(valueRealBitCoin, dataDollarValues);
       const data = valueRealBitCoin.map((bitCointValueReal, index) => {
         return {
           name: format(new Date(dateValue[index]), 'dd/MM/yyyy'),

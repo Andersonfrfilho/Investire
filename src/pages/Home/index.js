@@ -29,6 +29,7 @@ import Radio from '../../components/Radio';
 import IconButton from '../../components/IconButton';
 import DataPicker from '../../components/DataPicker';
 import InputValue from '../../components/InputValue';
+import Loader from '../../components/Loader';
 
 export default function Home() {
   const { loading } = useSelector(state => state.common);
@@ -41,7 +42,6 @@ export default function Home() {
     graphValue,
     majorValue,
   } = useSelector(state => state.investments);
-  console.tron.log(graphGenerate, graphGenerate);
   const [typeInvesting, setTypeInvesting] = useState('');
   const [message, setMessage] = useState('');
   const dispatch = useDispatch();
@@ -256,6 +256,9 @@ export default function Home() {
         daysBetween
       )
     );
+  }
+  if (loading) {
+    return <Loader />;
   }
   return (
     <AreaHome>
