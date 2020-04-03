@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { compareAsc, format, addYears, differenceInDays } from 'date-fns';
+import {
+  compareAsc,
+  format,
+  addYears,
+  differenceInCalendarDays,
+} from 'date-fns';
 import ModalOption from '../../components/ModalOption';
 
 import {
@@ -225,6 +230,10 @@ export default function Home() {
     valueParam,
     typeInvestingParam
   ) {
+    console.tron.log(dateInitialParam, valueParam, typeInvestingParam);
+    if (dateInitialParam === undefined || valueParam === 'R$: 0,000') {
+      return false;
+    }
     setHeightGraph(300);
     setVisibleComponentExist(false);
     if (!dateInitialParam || dateInitialParam === undefined) {
@@ -237,7 +246,7 @@ export default function Home() {
       setMessage('error date invalid');
       return false;
     }
-    const daysBetween = differenceInDays(today, initalDay);
+    const daysBetween = differenceInCalendarDays(today, initalDay) + 1;
     if (daysBetween <= 0) {
       setMessage('error date invalid');
       return false;
@@ -341,6 +350,12 @@ export default function Home() {
         </AreaButton>
 
         <AreaGraph visible={graphGenerate}>
+          <AreaText>
+            <Title bold>
+              Esta simulação não leva consideração o desconto do imposto de
+              renda
+            </Title>
+          </AreaText>
           <AreaTitle>
             <AreaText>
               <Title bold>Dia de início:</Title>

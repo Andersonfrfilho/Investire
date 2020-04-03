@@ -5,11 +5,7 @@ import { AreaButton, AreaIcon, Icon } from './styles';
 
 export default function IconButton({ icon, title, functionOnClick, disabled }) {
   return (
-    <AreaButton
-      data-testid="area-button"
-      disabled={disabled}
-      onClick={functionOnClick}
-    >
+    <AreaButton data-testid="area-button" disabled onClick={functionOnClick}>
       <AreaIcon data-testid="areaIcon">{icon}</AreaIcon>
     </AreaButton>
   );

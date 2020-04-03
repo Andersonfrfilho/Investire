@@ -2,6 +2,7 @@ import { all, call, put, takeLatest } from 'redux-saga/effects';
 import { toast } from 'react-toastify';
 import { subDays, format, addDays } from 'date-fns';
 import axios from 'axios';
+import { ptBR } from 'date-fns/locale';
 import { fixedRate, errorVerify } from '../../../utils';
 import { defineGraph } from './actions';
 import { loading, successAction, failureAction } from '../common/actions';
@@ -51,9 +52,13 @@ function* generateValue({
       }
     } else {
       const dateInitial = new Date(initialDate);
-      const dateInitialFormat = format(addDays(dateInitial, 1), 'yyyy-MM-dd');
+      const dateInitialFormat = format(dateInitial, 'yyyy-MM-dd', {
+        locale: ptBR,
+      });
       const dateEnd = new Date();
-      const dateEndFormat = format(dateEnd, 'yyyy-MM-dd');
+      const dateEndFormat = format(dateEnd, 'yyyy-MM-dd', {
+        locale: ptBR,
+      });
       const restYear = daysBetween % 100;
       const repeatYear = Math.trunc(daysBetween / 100);
       const {
@@ -70,55 +75,61 @@ function* generateValue({
         dateValue.push(key);
       }
       const dataDollarValues = [];
-      let dateInitalAux = dateInitial;
-      let dateInitialFormatAux = format(dateInitalAux, 'yyyyMMdd');
-      let dateFinalyAux = addDays(dateInitalAux, 100);
-      let dateFinalyFormatAux = format(dateFinalyAux, 'yyyyMMdd');
-      if (repeatYear !== 0) {
-        for (let i = 0; i < repeatYear; i += 1) {
-          const { data: dollarValues } = yield call(
-            axios.get,
-            `https://economia.awesomeapi.com.br/USD-BRL/${100}?start_date=${dateInitialFormatAux}&end_date=${dateFinalyFormatAux}`
-          );
-          dateInitalAux = dateFinalyAux;
-          dateInitialFormatAux = dateFinalyFormatAux;
-          dateFinalyAux = addDays(dateInitalAux, 100);
-          dateFinalyFormatAux = format(dateFinalyAux, 'yyyyMMdd');
-          for (let j = 0; j < dollarValues.length; j += 1) {
-            dataDollarValues.push(dollarValues[j]);
-          }
-        }
-      }
-      const { data: dollarValues } = yield call(
+      const dateInitalAux = dateInitial;
+      const dateInitialFormatAux = format(dateInitalAux, 'MM-dd-yyyy');
+      const dateFinalyFormatAux = format(new Date(), 'MM-dd-yyyy');
+      const {
+        data: { value: dollar },
+      } = yield call(
         axios.get,
-        `https://economia.awesomeapi.com.br/USD-BRL/${restYear}?start_date=${dateInitialFormatAux}&end_date=${dateFinalyFormatAux}`
+        `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?@dataInicial='${dateInitialFormatAux}'&@dataFinalCotacao='${dateFinalyFormatAux}'&$top=${dateValue.length}&$format=json&$select=cotacaoCompra,dataHoraCotacao`
       );
-      for (let j = 0; j < dollarValues.length; j += 1) {
-        dataDollarValues.push(dollarValues[j]);
+      let positionBitCoin = 0;
+      let positionDollar = 0;
+      const arrayDateValue = [];
+      while (positionBitCoin < dateValue.length) {
+        const dateFormat = format(
+          new Date(dollar[positionDollar].dataHoraCotacao),
+          'yyyy-MM-dd'
+        );
+        if (dateFormat === dateValue[positionBitCoin]) {
+          arrayDateValue.push({
+            date: `${dateValue[positionBitCoin].slice(8, 10)}/${dateValue[
+              positionBitCoin
+            ].slice(5, 7)}/${dateValue[positionBitCoin].slice(0, 4)}`,
+            valueDollar: dollar[positionDollar].cotacaoCompra,
+            bitCoinValue:
+              valueBitCoin[positionBitCoin] *
+              dollar[positionDollar].cotacaoCompra,
+          });
+
+          positionDollar += 1;
+        }
+        positionBitCoin += 1;
       }
-      const valuesDollarForReal = dataDollarValues.map(element => element.high);
-      const valueRealBitCoin = valueBitCoin.map(
-        (bitcoin, index) => bitcoin * valuesDollarForReal[index]
-      );
-      const qtdbitCoin = initialValue / valueRealBitCoin[0];
-      const data = valueRealBitCoin.map((bitCointValueReal, index) => {
+
+      const qtdbitCoin = initialValue / arrayDateValue[0].bitCoinValue;
+
+      const data = arrayDateValue.map((bitCointValueReal, index) => {
         return {
-          name: format(new Date(dateValue[index]), 'dd/MM/yyyy'),
-          valor: (Number(qtdbitCoin) * Number(bitCointValueReal)).toFixed(2),
+          name: bitCointValueReal.date,
+          valor: (
+            Number(qtdbitCoin) * Number(bitCointValueReal.bitCoinValue)
+          ).toFixed(2),
           time: index,
         };
       });
-      if (daysBetween >= 30) {
+      if (arrayDateValue.length >= 30) {
         for (let i = 30; i > 0; i -= 1) {
           dataGraph.push({ ...data[data.length - i], time: 30 - i });
         }
       } else {
-        for (let i = 0; i > Number(daysBetween); i += 1) {
+        for (let i = 0; i < Number(arrayDateValue.length); i += 1) {
           dataGraph.push({ ...data[i], time: i });
         }
       }
-      diferenceValue = data[data.length - 2].valor - data[0].valor;
-      investimentValue = data[data.length - 2].valor;
+      diferenceValue = data[data.length - 1].valor - data[0].valor;
+      investimentValue = data[data.length - 1].valor;
     }
     let valueMajor = dataGraph[0].valor;
     for (let i = 0; i < dataGraph.length; i += 1) {
